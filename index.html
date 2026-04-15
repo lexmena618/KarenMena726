@@ -176,10 +176,7 @@
 
 <div class="hearts-bg" id="heartsBg"></div>
 
-<!-- Hidden YouTube player -->
-<div id="ytContainer" style="position:fixed;bottom:60px;right:16px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;z-index:0;">
-  <div id="ytPlayer"></div>
-</div>
+
 
 <div class="card">
   <span id="faceEmoji">😊</span>
@@ -281,40 +278,28 @@
     faceEmoji.classList.add('bump');
   }
 
-  /* Music — YouTube IFrame API */
-  /* ✏️ SONG ID: "Eso y Mas" by Joan Sebastian — if this ever stops working,
-     go to the YouTube video, copy the part after "v=" in the URL, paste it below */
+  /* Music — simple YouTube iframe */
   const YT_VIDEO_ID = 'v5Wl9_14GTY';
-
-  let ytPlayer = null;
-  let playing  = false;
-  let ytReady  = false;
-
-  window.onYouTubeIframeAPIReady = function() {
-    ytPlayer = new YT.Player('ytPlayer', {
-      height: '1', width: '1',
-      videoId: YT_VIDEO_ID,
-      playerVars: { autoplay: 0, loop: 1, playlist: YT_VIDEO_ID, controls: 0 },
-      events: { onReady: () => { ytReady = true; } }
-    });
-  };
-
-  /* Load YouTube API script */
-  (function() {
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
-  })();
+  let playing = false;
+  let ytFrame = null;
 
   function toggleMusic() {
-    if (!ytReady) { alert('Player still loading, try again in a second!'); return; }
-    if (playing) {
-      ytPlayer.pauseVideo();
+    if (!ytFrame) {
+      ytFrame = document.createElement('iframe');
+      ytFrame.src = `https://www.youtube.com/embed/${YT_VIDEO_ID}?autoplay=1&loop=1&playlist=${YT_VIDEO_ID}&controls=0&enablejsapi=0`;
+      ytFrame.allow = 'autoplay';
+      ytFrame.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;bottom:0;right:0;';
+      document.body.appendChild(ytFrame);
+      document.getElementById('musicIcon').textContent  = '⏸';
+      document.getElementById('musicLabel').textContent = ' Pause Music';
+      playing = true;
+    } else if (playing) {
+      ytFrame.src = '';
       document.getElementById('musicIcon').textContent  = '▶';
       document.getElementById('musicLabel').textContent = ' Play Music';
       playing = false;
     } else {
-      ytPlayer.playVideo();
+      ytFrame.src = `https://www.youtube.com/embed/${YT_VIDEO_ID}?autoplay=1&loop=1&playlist=${YT_VIDEO_ID}&controls=0&enablejsapi=0`;
       document.getElementById('musicIcon').textContent  = '⏸';
       document.getElementById('musicLabel').textContent = ' Pause Music';
       playing = true;
