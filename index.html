@@ -176,14 +176,14 @@
 
 <div class="hearts-bg" id="heartsBg"></div>
 
-<!-- ✏️ Replace "your-song.mp3" with your actual mp3 filename uploaded to GitHub -->
-<audio id="bgMusic" loop>
-  <source src="song.mp3" type="audio/mpeg">
-</audio>
+<!-- Hidden YouTube player -->
+<div id="ytContainer" style="position:fixed;bottom:60px;right:16px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;z-index:0;">
+  <div id="ytPlayer"></div>
+</div>
 
 <div class="card">
   <span id="faceEmoji">😊</span>
-  <p class="question" id="question">Hey Karen, will you go out with me May 23rd? 🥺</p>
+  <p class="question" id="question">Hey Karen, will you go out with me next Thursday? 🥺</p>
   <div class="btn-row" id="btnRow">
     <button class="btn-yes" id="yesBtn" onclick="sayYes()">Yes! 💜</button>
     <button class="btn-no"  id="noBtn"  onclick="sayNo()">No</button>
@@ -281,23 +281,43 @@
     faceEmoji.classList.add('bump');
   }
 
-  /* Music */
-  const audio = document.getElementById('bgMusic');
-  let playing = false;
+  /* Music — YouTube IFrame API */
+  /* ✏️ SONG ID: "Eso y Mas" by Joan Sebastian — if this ever stops working,
+     go to the YouTube video, copy the part after "v=" in the URL, paste it below */
+  const YT_VIDEO_ID = 'pMb_9RWaCxQ';
+
+  let ytPlayer = null;
+  let playing  = false;
+  let ytReady  = false;
+
+  window.onYouTubeIframeAPIReady = function() {
+    ytPlayer = new YT.Player('ytPlayer', {
+      height: '1', width: '1',
+      videoId: YT_VIDEO_ID,
+      playerVars: { autoplay: 0, loop: 1, playlist: YT_VIDEO_ID, controls: 0 },
+      events: { onReady: () => { ytReady = true; } }
+    });
+  };
+
+  /* Load YouTube API script */
+  (function() {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  })();
+
   function toggleMusic() {
+    if (!ytReady) { alert('Player still loading, try again in a second!'); return; }
     if (playing) {
-      audio.pause();
+      ytPlayer.pauseVideo();
       document.getElementById('musicIcon').textContent  = '▶';
       document.getElementById('musicLabel').textContent = ' Play Music';
       playing = false;
     } else {
-      audio.play().then(() => {
-        document.getElementById('musicIcon').textContent  = '⏸';
-        document.getElementById('musicLabel').textContent = ' Pause Music';
-        playing = true;
-      }).catch(() => {
-        alert('Music not set up yet!\n\nSee the instructions below the download link to add your song.');
-      });
+      ytPlayer.playVideo();
+      document.getElementById('musicIcon').textContent  = '⏸';
+      document.getElementById('musicLabel').textContent = ' Pause Music';
+      playing = true;
     }
   }
 
